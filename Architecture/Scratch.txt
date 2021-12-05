@@ -1,0 +1,135 @@
+﻿
+            //static member pure_(a:'a) = { run = flip id a }
+            //instance Applicative Effect where
+            //Effect ab <*> Effect a = Effect $ \b -> ab (\f -> a (b . f))
+            //static member (<*>) (ab:Effect<'``a -> 'b``>, (a:Effect<'a>)) = 
+            //    let y = fun b -> ab.run (fun (f: 'a -> 'a) -> a.run (f >> b))
+            //    { run = y }
+            
+            namespace Architecture
+            
+            open System
+            
+            module CustomStructure =
+                type MarkedType = interface end 
+                type Effect     = inherit MarkedType 
+                type Reducer    = inherit MarkedType
+                
+                type HKT<'T when 'T :> MarkedType> = interface end
+                
+                [<AbstractClass>]
+                type Container<'T when 'T :> HKT<MarkedType>>() =
+                    interface IEquatable<'T> with
+                            member this.Equals other = true
+            
+                    override this.Equals other =
+                        match other with
+                        | :? Customer as p -> (this :> IEquatable<_>).Equals p
+                        | _ -> false
+                    override this.GetHashCode () = this.CustomerId.GetHashCode()
+                    
+                    
+                       (* Pullbacks and the Global Context Map *)
+                       // -- A Contravariant blueprint of relations
+                       //    between a local reducer context to the global reducer context. It is used
+                       //    during composition to produce a global domain reducer.
+                       //
+                       //    A context is simply the domain in which a reducer can operate on. In our case the global reducer
+                       //    is the combination of all the local reducers. It is never directly instantiated rather composed
+                       //    from all the local parts.
+                       //
+                       //    - Explanation -
+                       //      Take our typical reducer form
+                       //          reducer = State -> Action -> Environment -> State * Effect
+                       //      Effect is a monoid because of this our reducer can take a monoid form
+                       //          reducer = (Effect.empty * State) -> Action -> Environment -> (State * Effect)
+                       //      Effect can be dropped and the transformation inputs can be grouped together
+                       //          reducer = State -> (Action -> Environment) -> State
+                       //              or rather
+                       //          reducer = s -> a -> s
+                       //      And for any given reducer where The state is a product type and the action space
+                       //      is a sum type we can preform a simple contramap or pullback in certain communities.
+                       //      The Global Context map is the set of functions that relate the global context to
+                       //      the local context.
+                       //
+                       //      The intuition for this operation being that.
+                       //
+                       //          Given a set S of finite numbers, function from (x -> bool), and a random value x in S
+                       //          You could pass in x to (x -> bool) and tell me if it were true or false
+                       //          The inverse isn't true however
+                       //          only given the result true or false, (x -> bool), and the original set
+                       //          you could not tell me what x was. the functor from x -> bool is said to be forgetful
+                       //          in that the context has been abstracted away
+                       //
+                       //          What you derive though is the sub set of numbers that resulted in true or false by running
+                       //          them all through the original function. So while you can't derive x from the result.
+                       //          You can narrow it down to a smaller set (the local domain)
+                       //          for which a smaller set of functors     (local actions)
+                       //          can act on the values in the domain x   (the local domains properties)
+                       //
+                       
+                    (* -- Global Domain -- *)
+                    // -- A Contravariant blueprint of relations
+                    //    between all the context reducers. It is used
+                    //    during composition to a global domain reducer that facilities
+                    //    the reduction of the domain without the domains
+                    //    ever knowing of each other.
+                    
+                // Trivial example of Context Composition.
+                // Approach
+                //      - A stratified call hierarchy to model communication strategy.
+                // The Scope a context can represent
+                // Largest context
+                //      - A reducer of and size and state with the largest suggested being a domain feature
+                // Smallest context representable
+                //      - A reducer that acts on a single mutable value with a single trivial replacement function.
+
+open System.Reflection
+
+#r "C:\\Users\\windev\\.nuget\\packages\\fsharp.quotations.evaluator\\2.1.0\\lib\\netstandard2.0\\FSharp.Quotations.Evaluator.dll"
+
+open FSharp.Quotations.Evaluator
+open FSharp.Reflection
+open Microsoft.FSharp.Quotations.Patterns
+open System
+
+QuotationEvaluator.Evaluate <@ 1 + 1 @>
+/// Evaluates an expression. From http://www.fssnip.net/h1
+let rec eval = function
+    | Value (v, _) -> v
+    | Coerce (e, _) -> eval e
+    | NewObject (ci, args) -> ci.Invoke (evalAll args)
+    | NewArray (t, args) -> 
+        let array = Array.CreateInstance (t, args.Length) 
+        args |> List.iteri (fun i arg -> array.SetValue (eval arg, i))
+        box array
+    | NewUnionCase (case, args) -> FSharpValue.MakeUnion (case, evalAll args)
+    | NewRecord (t, args) -> FSharpValue.MakeRecord (t, evalAll args)
+    | NewTuple args ->
+        let t = FSharpType.MakeTupleType [| for arg in args -> arg.Type |]
+        FSharpValue.MakeTuple (evalAll args, t)
+    | FieldGet (Some (Value (v, _)), fi) -> fi.GetValue v
+    | PropertyGet (None, pi, args) -> pi.GetValue (null, evalAll args)
+    | PropertyGet (Some x, pi, args) -> pi.GetValue (eval x, evalAll args)
+    | Call (None, mi, args) -> mi.Invoke (null, evalAll args)
+    | Call (Some x, mi, args) -> mi.Invoke (eval x, evalAll args)
+    | x -> raise <| NotSupportedException(string x)
+and evalAll args = [| for arg in args -> eval arg |]
+let addPlusOne = QuotationEvaluator.Evaluate <@ fun x y -> x + y + 1 @> 
+type Record = { abc : string }
+let record = { abc = "123" }
+
+let propertyGet (e) : MethodInfo =
+    match e with
+    | PropertyGet (e, pi, li) -> pi.GetMethod
+    | _ -> failwith "not a let-bound value"
+    
+
+let inline nine<'s,'a> : ('s -> 'a ->'s -> 'a) =
+    let f (s:'s) (a:'a) = downcast (propertyGet <@@ a @@>).Invoke(s, [||]) : ('s -> 'a)
+    f
+
+let abc = record.abc
+let z:(Record -> string) = nine<Record,string> record abc
+
+IEquatable<T> for equality. IComparable<T> for ordering

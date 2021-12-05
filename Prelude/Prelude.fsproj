@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Hole.fs" />
+        <Compile Include="Combinators.fs" />
+        <Compile Include="Never.fs" />
+        <Compile Include="Either.fs" />
+        <Compile Include="Optics\Lens.fs" />
+        <Compile Include="Optics\Prism.fs" />
+        <Content Include="Optics\README.md" />
+        <Compile Include="Function.fs" />
+        <Compile Include="Tuple.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FSharp.Quotations.Evaluator" Version="2.1.0" />
+    </ItemGroup>
+
+</Project>

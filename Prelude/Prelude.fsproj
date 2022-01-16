@@ -13,10 +13,11 @@
         <Compile Include="Function.fs" />
         <Compile Include="Tuple.fs" />
         <Compile Include="Reader.fs" />
+        <Compile Include="State.fs" />
         <Compile Include="Optics\Lens.fs" />
         <Compile Include="Optics\Prism.fs" />
         <Content Include="Optics\README.md" />
-        <Compile Include="State.fs" />
+        <Compile Include="Result.fs" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,4 +1,5 @@
 ﻿namespace Architecture
+open Prelude
 
 [<AutoOpen>]
 module Effect =

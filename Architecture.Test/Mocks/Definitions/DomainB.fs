@@ -1,6 +1,7 @@
 ﻿namespace Architecture.Test.Mocks.Definitions
 
 open Architecture
+open Prelude
 
 [<AutoOpen>]
 module DomainB =

@@ -5,6 +5,7 @@ open System
 [<RequireQualifiedAccess>]
 module Result =
     let ofOption error = function Some s -> Ok s | None -> Error error
+    let bimap f g = function Ok r -> Ok (f r) | Error e -> Error(g e)
 
     type ResultBuilder() =
         member _.Return(x) = Ok x

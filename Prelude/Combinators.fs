@@ -37,6 +37,7 @@ module Combinators =
     let on f g x y = f (g(x)) (g(y))
     let finch x y f = f y x
     let pairing x y f = f x y
+    let join1 x y = y x x
 
     let fix' f x = 
             let r = ref Unchecked.defaultof<'a -> 'b>
@@ -59,3 +60,4 @@ module Combinators =
     let F = finch
     let V = pairing
     let Y = fix'
+    let W' = join1

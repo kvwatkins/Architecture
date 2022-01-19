@@ -35,6 +35,9 @@ module Combinators =
     let chain f g x = f (g(x)) x
     let liftA2 f g h x = f (g x) (h x)
     let on f g x y = f (g(x)) (g(y))
+    let finch x y f = f y x
+    let pairing x y f = f x y
+
     let fix' f x = 
             let r = ref Unchecked.defaultof<'a -> 'b>
             r.Value <- (f r.Value)
@@ -53,4 +56,6 @@ module Combinators =
     let S_ = chain
     let S' = liftA2
     let P = on
+    let F = finch
+    let V = pairing
     let Y = fix'

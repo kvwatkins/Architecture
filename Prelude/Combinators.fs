@@ -61,3 +61,12 @@ module Combinators =
     let V = pairing
     let Y = fix'
     let W' = join1
+
+    //lift variable to function
+    let a2 t1 t2 = fun f -> f t1 t2
+    let a3 t1 t2 t3 = fun f -> f t1 t2 t3
+    let a4 t1 t2 t3 t4 = fun f -> f t1 t2 t3 t4
+    let a5 t1 t2 t3 t4 t5 = fun f -> f t1 t2 t3 t4 t5
+
+    //apply to constructor
+    let ac2 t1 t2 f = f (t1,t2)

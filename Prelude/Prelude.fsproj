@@ -18,6 +18,7 @@
         <Compile Include="Optics\Lens.fs" />
         <Compile Include="Optics\Prism.fs" />
         <Content Include="Optics\README.md" />
+        <Compile Include="Optics\NewFile1.fs" />
     </ItemGroup>
 
     <ItemGroup>
